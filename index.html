@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Comparador de fechas de Planner</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      const isGitHubPages =
+        window.location.hostname.endsWith('github.io') ||
+        window.location.pathname.startsWith('/excelprueba/');
+
+      if (isGitHubPages) {
+        const stylesheet = document.createElement('link');
+        stylesheet.rel = 'stylesheet';
+        stylesheet.href = '/excelprueba/assets/app.css';
+        document.head.appendChild(stylesheet);
+        const appModule = '/excelprueba/assets/' + 'app.js';
+        await import(/* @vite-ignore */ appModule);
+      } else {
+        await import('/src/main.tsx');
+      }
+    </script>
+  </body>
+</html>
