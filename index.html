@@ -10,14 +10,14 @@
     <script type="module">
       const isGitHubPages =
         window.location.hostname.endsWith('github.io') ||
-        window.location.pathname.startsWith('/excelprueba/');
+        window.location.pathname.startsWith('/excel.prueba/');
 
       if (isGitHubPages) {
         const stylesheet = document.createElement('link');
         stylesheet.rel = 'stylesheet';
-        stylesheet.href = '/excelprueba/assets/app.css';
+        stylesheet.href = '/excel.prueba/assets/app.css';
         document.head.appendChild(stylesheet);
-        const appModule = '/excelprueba/assets/' + 'app.js';
+        const appModule = '/excel.prueba/assets/' + 'app.js';
         await import(/* @vite-ignore */ appModule);
       } else {
         await import('/src/main.tsx');
