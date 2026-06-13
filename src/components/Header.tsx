@@ -1,10 +1,9 @@
 interface HeaderProps {
   canCreateMaster: boolean;
   onCreateMaster: () => void;
-  onLoadDemoData: () => void;
 }
 
-export function Header({ canCreateMaster, onCreateMaster, onLoadDemoData }: HeaderProps) {
+export function Header({ canCreateMaster, onCreateMaster }: HeaderProps) {
   const peLogoUrl = `${import.meta.env.BASE_URL}power-electronics-transparente.webp`;
 
   return (
@@ -16,9 +15,6 @@ export function Header({ canCreateMaster, onCreateMaster, onLoadDemoData }: Head
         </div>
       </div>
       <div className="header-actions">
-        <button className="header-demo-button" type="button" onClick={onLoadDemoData}>
-          Probar con datos de ejemplo
-        </button>
         <button
           className="header-create-button"
           type="button"

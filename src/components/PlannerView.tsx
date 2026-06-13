@@ -42,95 +42,6 @@ interface PlannerItem {
   row?: ComparedRow;
 }
 
-const demoItems: PlannerItem[] = [
-  {
-    id: 'demo-1',
-    title: 'Entrega plano unifilar definitivo',
-    description: 'Documento pendiente para revision tecnica.',
-    assignee: 'Ana Lopez',
-    project: 'Proyecto Demo Norte',
-    bucket: 'Planificacion',
-    dueDate: '2026-06-17',
-    dueTone: 'late',
-    labels: [
-      { text: 'Ingenieria', tone: 'blue' },
-      { text: 'Retrasado', tone: 'red' },
-    ],
-    checklist: '1 / 3',
-    infoCount: 2,
-  },
-  {
-    id: 'demo-2',
-    title: 'Recepcion documentacion inversores',
-    assignee: 'Bruno Martin',
-    project: 'Proyecto Demo Norte',
-    bucket: 'Ingenieria y documentacion',
-    dueDate: '2026-06-20',
-    dueTone: 'normal',
-    labels: [{ text: 'Documentacion', tone: 'gray' }],
-    checklist: '2 / 4',
-  },
-  {
-    id: 'demo-3',
-    title: 'Aprobacion memoria tecnica',
-    description: 'Fecha adelantada respecto a la planificación del maestro.',
-    assignee: 'Carla Ruiz',
-    project: 'Proyecto Demo Sur',
-    bucket: 'Revision y aprobacion',
-    dueDate: '2026-06-12',
-    dueTone: 'early',
-    labels: [
-      { text: 'Requiere aprobacion', tone: 'yellow' },
-      { text: 'Adelantado', tone: 'green' },
-    ],
-    infoCount: 1,
-  },
-  {
-    id: 'demo-4',
-    title: 'Recepcion de modulos fotovoltaicos',
-    assignee: 'David Perez',
-    project: 'Proyecto Demo Sur',
-    bucket: 'Compras y suministro',
-    dueDate: '2026-06-24',
-    dueTone: 'late',
-    labels: [
-      { text: 'Compras', tone: 'yellow' },
-      { text: 'Retrasado', tone: 'red' },
-    ],
-    checklist: '0 / 2',
-  },
-  {
-    id: 'demo-5',
-    title: 'Acta de recepcion de obra',
-    assignee: 'Elena Santos',
-    project: 'Proyecto Demo Este',
-    bucket: 'Ejecucion y recepcion',
-    dueDate: '2026-06-28',
-    dueTone: 'normal',
-    labels: [{ text: 'Nuevo', tone: 'purple' }],
-    infoCount: 3,
-  },
-  {
-    id: 'demo-6',
-    title: 'Revision listado de materiales',
-    assignee: 'Ana Lopez',
-    project: 'Proyecto Demo Norte',
-    bucket: 'Compras y suministro',
-    dueDate: '2026-06-14',
-    dueTone: 'early',
-    labels: [{ text: 'Adelantado', tone: 'green' }],
-    checklist: '3 / 3',
-  },
-];
-
-const demoColumnOrder = [
-  'Planificacion',
-  'Ingenieria y documentacion',
-  'Revision y aprobacion',
-  'Compras y suministro',
-  'Ejecucion y recepcion',
-];
-
 function uniqueSorted(values: string[]): string[] {
   return Array.from(new Set(values.filter(Boolean))).sort((left, right) =>
     left.localeCompare(right, 'es'),
@@ -293,9 +204,7 @@ function groupItemsByBucket(items: PlannerItem[], preferredOrder: string[]): Arr
 }
 
 export function PlannerView({ rows }: PlannerViewProps) {
-  const realItems = useMemo(() => itemsFromRows(rows), [rows]);
-  const isDemo = realItems.length === 0;
-  const sourceItems = isDemo ? demoItems : realItems;
+  const sourceItems = useMemo(() => itemsFromRows(rows), [rows]);
   const [filters, setFilters] = useState(initialPlanningFilters);
   const [selectedItem, setSelectedItem] = useState<PlannerItem | null>(null);
 
@@ -320,9 +229,7 @@ export function PlannerView({ rows }: PlannerViewProps) {
     return matchesSearch && matchesAssignee && matchesProject && matchesChange;
   });
 
-  const columnOrder = isDemo
-    ? demoColumnOrder
-    : Array.from(new Set(sourceItems.map((item) => item.bucket)));
+  const columnOrder = Array.from(new Set(sourceItems.map((item) => item.bucket)));
   const columns = groupItemsByBucket(filteredItems, columnOrder);
 
   return (
@@ -336,68 +243,68 @@ export function PlannerView({ rows }: PlannerViewProps) {
       />
 
       <section className="planner-view" aria-label="Vista Planner">
-      <div className="planner-board-shell">
-        <div className="planner-board">
-          {columns.length === 0 ? (
-            <div className="planner-empty">No hay elementos para los filtros seleccionados.</div>
-          ) : (
-            columns.map(([bucket, items]) => (
-              <section className="planner-column" key={bucket}>
-                <h3>{bucket}</h3>
-                <button className="planner-add-button" type="button">
-                  <span aria-hidden="true">+</span>
-                  Añadir elemento
-                </button>
-                <div className="planner-card-list">
-                  {items.map((item) => (
-                    <button
-                      type="button"
-                      className="planner-card"
-                      key={item.id}
-                      onClick={() => setSelectedItem(item)}
-                    >
-                      {item.labels.length > 0 && (
-                        <div className="planner-labels">
-                          {item.labels.map((label) => (
-                            <span className={`planner-label label-${label.tone}`} key={label.text}>
-                              {label.text}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      <span className="planner-card-title">{item.title}</span>
-                      {item.description && (
-                        <span className="planner-card-description">{item.description}</span>
-                      )}
-                      <span className="planner-card-meta">
-                        <span className={`planner-date date-${item.dueTone}`}>
-                          {formatCompactDate(item.dueDate)}
-                        </span>
-                        {item.checklist && <span className="planner-mini-meta">{item.checklist}</span>}
-                        {typeof item.infoCount === 'number' && (
-                          <span className="planner-mini-meta">{item.infoCount} info</span>
+        <div className="planner-board-shell">
+          <div className="planner-board">
+            {columns.length === 0 ? (
+              <div className="planner-empty">No hay elementos para los filtros seleccionados.</div>
+            ) : (
+              columns.map(([bucket, items]) => (
+                <section className="planner-column" key={bucket}>
+                  <h3>{bucket}</h3>
+                  <button className="planner-add-button" type="button">
+                    <span aria-hidden="true">+</span>
+                    Añadir elemento
+                  </button>
+                  <div className="planner-card-list">
+                    {items.map((item) => (
+                      <button
+                        type="button"
+                        className="planner-card"
+                        key={item.id}
+                        onClick={() => setSelectedItem(item)}
+                      >
+                        {item.labels.length > 0 && (
+                          <div className="planner-labels">
+                            {item.labels.map((label) => (
+                              <span className={`planner-label label-${label.tone}`} key={label.text}>
+                                {label.text}
+                              </span>
+                            ))}
+                          </div>
                         )}
-                        <span className="planner-avatar" title={item.assignee}>
-                          {getInitials(item.assignee)}
+                        <span className="planner-card-title">{item.title}</span>
+                        {item.description && (
+                          <span className="planner-card-description">{item.description}</span>
+                        )}
+                        <span className="planner-card-meta">
+                          <span className={`planner-date date-${item.dueTone}`}>
+                            {formatCompactDate(item.dueDate)}
+                          </span>
+                          {item.checklist && <span className="planner-mini-meta">{item.checklist}</span>}
+                          {typeof item.infoCount === 'number' && (
+                            <span className="planner-mini-meta">{item.infoCount} info</span>
+                          )}
+                          <span className="planner-avatar" title={item.assignee}>
+                            {getInitials(item.assignee)}
+                          </span>
                         </span>
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </section>
-            ))
-          )}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              ))
+            )}
+          </div>
         </div>
-      </div>
 
-      {selectedItem?.row && (
-        <EventDetailModal
-          row={selectedItem.row}
-          project={selectedItem.project}
-          dueDate={selectedItem.dueDate}
-          onClose={() => setSelectedItem(null)}
-        />
-      )}
+        {selectedItem?.row && (
+          <EventDetailModal
+            row={selectedItem.row}
+            project={selectedItem.project}
+            dueDate={selectedItem.dueDate}
+            onClose={() => setSelectedItem(null)}
+          />
+        )}
       </section>
     </>
   );

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { readPlannerExcel } from '../services/excelReader';
-import { createMockPlannerSheet } from '../services/mockData';
 import type { ParsedPlannerSheet } from '../types/excel';
 
 interface PlannerUploadState {
@@ -14,7 +13,6 @@ interface UsePlannerWorkbookResult extends PlannerUploadState {
   isReady: boolean;
   loadPlannerFile: (file: File) => Promise<void>;
   clearPlannerFile: () => void;
-  loadDemoData: () => void;
 }
 
 const initialState: PlannerUploadState = {
@@ -61,21 +59,11 @@ export function usePlannerWorkbook(): UsePlannerWorkbookResult {
     setState(initialState);
   };
 
-  const loadDemoData = (): void => {
-    const demo = createMockPlannerSheet();
-    setState({
-      fileName: demo.fileName,
-      parsedSheet: demo,
-      error: null,
-    });
-  };
-
   return {
     ...state,
     isProcessing,
     isReady: Boolean(state.parsedSheet),
     loadPlannerFile,
     clearPlannerFile,
-    loadDemoData,
   };
 }

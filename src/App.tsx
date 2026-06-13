@@ -81,13 +81,6 @@ function App() {
     setWorkspaceMessage(null);
   };
 
-  const handleLoadDemoData = (): void => {
-    planner.loadDemoData();
-    setLastLoadAt(new Date());
-    setFilters(initialPlanningFilters);
-    setWorkspaceMessage('Datos de ejemplo cargados para el Excel de Planner actual.');
-  };
-
   const handleCreateMasterCopy = async (): Promise<void> => {
     if (!master.workbook || !canCreateMasterCopy) {
       return;
@@ -114,9 +107,6 @@ function App() {
       <div className="empty-actions">
         <button className="primary-button" type="button" onClick={() => setIsFileModalOpen(true)}>
           Cargar archivos
-        </button>
-        <button className="secondary-button" type="button" onClick={handleLoadDemoData}>
-          Probar con datos de ejemplo
         </button>
       </div>
     </section>
@@ -200,7 +190,6 @@ function App() {
       <Header
         canCreateMaster={canStartMasterFlow}
         onCreateMaster={() => setIsCreateModalOpen(true)}
-        onLoadDemoData={handleLoadDemoData}
       />
 
       <main>
