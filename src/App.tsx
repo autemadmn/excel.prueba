@@ -159,7 +159,6 @@ function App() {
           rows={plannerRows}
           masterWorkbook={master.workbook}
           plannerProjectName={plannerProjectName}
-          plannerFileName={planner.fileName}
           onMasterUpdated={() => setMasterVersion((version) => version + 1)}
         />
       );
@@ -189,11 +188,6 @@ function App() {
         <MasterView
           candidates={masterCandidates}
           masterWorkbook={master.workbook}
-          validation={validation}
-          plannerFileName={planner.fileName}
-          masterFileName={master.fileName}
-          onCreateMaster={() => setIsCreateModalOpen(true)}
-          canCreateMaster={canStartMasterFlow}
         />
       );
     }

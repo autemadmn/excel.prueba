@@ -326,7 +326,7 @@ export function PlannerView({ rows }: PlannerViewProps) {
   const columns = groupItemsByBucket(filteredItems, columnOrder);
 
   return (
-    <section className="planner-view" aria-label="Vista Planner">
+    <>
       <PlanningFiltersBar
         filters={filters}
         projectOptions={projectOptions}
@@ -335,6 +335,7 @@ export function PlannerView({ rows }: PlannerViewProps) {
         onClearFilters={() => setFilters(initialPlanningFilters)}
       />
 
+      <section className="planner-view" aria-label="Vista Planner">
       <div className="planner-board-shell">
         <div className="planner-board">
           {columns.length === 0 ? (
@@ -397,6 +398,7 @@ export function PlannerView({ rows }: PlannerViewProps) {
           onClose={() => setSelectedItem(null)}
         />
       )}
-    </section>
+      </section>
+    </>
   );
 }

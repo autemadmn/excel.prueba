@@ -2051,7 +2051,9 @@ main {
 
 .master-workspace {
   display: grid;
-  gap: 14px;
+  grid-template-rows: minmax(240px, 40vh) minmax(440px, 60vh);
+  gap: 12px;
+  min-height: 0;
 }
 
 .master-changes-panel,
@@ -2066,33 +2068,33 @@ main {
 
 .master-changes-panel {
   gap: 12px;
-  max-height: 42vh;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .master-workbook-panel {
   gap: 12px;
-  min-height: 58vh;
+  grid-template-rows: auto auto auto auto minmax(0, 1fr);
+  min-height: 0;
+  overflow: hidden;
 }
 
 .master-section-heading {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 14px;
 }
 
-.master-section-heading h2,
-.master-selected-change h3 {
+.master-section-heading h2 {
   margin: 0;
   color: var(--navy-900);
 }
 
 .master-section-heading h2 {
   font-size: 1rem;
-}
-
-.master-selected-change h3 {
-  font-size: 0.98rem;
 }
 
 .master-sheet-meta {
@@ -2109,6 +2111,12 @@ main {
   color: var(--text-secondary);
   background: #f8fafc;
   font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.master-inline-count {
+  color: var(--text-secondary);
+  font-size: 0.78rem;
   font-weight: 800;
 }
 
@@ -2168,12 +2176,12 @@ main {
 }
 
 .master-change-table-shell {
-  max-height: 24vh;
+  min-height: 0;
 }
 
 .master-edit-table-shell {
-  min-height: 420px;
-  max-height: 64vh;
+  min-height: 0;
+  max-height: none;
 }
 
 .master-change-table,
@@ -2233,10 +2241,11 @@ main {
   text-overflow: ellipsis;
 }
 
-.master-selected-change {
+.master-selected-compact {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 14px;
   border: 1px solid rgba(36, 74, 112, 0.16);
   border-radius: 8px;
@@ -2244,38 +2253,20 @@ main {
   background: #f8fbff;
 }
 
-.master-selected-change p {
+.master-selected-compact p {
+  flex: 1 1 260px;
+  min-width: 0;
   margin: 0;
   color: var(--text-secondary);
+  font-size: 0.84rem;
   font-weight: 700;
 }
 
-.master-selected-change dl {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 8px 0 0;
-}
-
-.master-selected-change div div {
-  display: grid;
-  gap: 2px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 6px 8px;
-  background: #ffffff;
-}
-
-.master-selected-change dt {
-  color: var(--text-secondary);
-  font-size: 0.7rem;
-  font-weight: 800;
-}
-
-.master-selected-change dd {
-  margin: 0;
-  color: var(--navy-900);
-  font-weight: 900;
+.master-selected-compact .primary-button {
+  min-height: 38px;
+  flex: 0 1 auto;
+  max-width: 100%;
+  white-space: normal;
 }
 
 .master-auto-filter-strip {

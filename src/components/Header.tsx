@@ -5,7 +5,7 @@ interface HeaderProps {
 }
 
 export function Header({ canCreateMaster, onCreateMaster, onLoadDemoData }: HeaderProps) {
-  const peLogoUrl = `${import.meta.env.BASE_URL}pe-logo.webp`;
+  const peLogoUrl = `${import.meta.env.BASE_URL}power-electronics-transparente.webp`;
 
   return (
     <header className="app-header">

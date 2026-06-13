@@ -20,7 +20,6 @@ interface GridViewProps {
   rows: ComparedRow[];
   masterWorkbook: ParsedMasterWorkbook | null;
   plannerProjectName: string;
-  plannerFileName: string | null;
   onMasterUpdated?: () => void;
 }
 
@@ -184,7 +183,6 @@ export function GridView({
   rows,
   masterWorkbook,
   plannerProjectName,
-  plannerFileName,
   onMasterUpdated,
 }: GridViewProps) {
   const [filters, setFilters] = useState(initialPlanningFilters);
@@ -320,19 +318,7 @@ export function GridView({
   }
 
   return (
-    <section className="grid-view" aria-label="Vista Tabla">
-      <div className={`grid-validation ${validation.status === 'valid' ? 'is-valid' : 'is-blocked'}`}>
-        <div>
-          <strong>Validación del proyecto</strong>
-          <span>{validation.message}</span>
-        </div>
-        <div className="grid-validation-meta">
-          <span>Planner: {plannerFileName ?? 'Sin archivo'}</span>
-          <span>B1: {plannerProjectName || 'No detectado'}</span>
-          {masterWorkbook && <span>Maestro: {masterWorkbook.fileName}</span>}
-        </div>
-      </div>
-
+    <>
       <PlanningFiltersBar
         filters={filters}
         projectOptions={projectOptions}
@@ -341,6 +327,7 @@ export function GridView({
         onClearFilters={clearFilters}
       />
 
+      <section className="grid-view" aria-label="Vista Tabla">
       <div className="grid-action-bar">
         <div className="grid-counts">
           <strong>{filteredItems.length}</strong> filas visibles
@@ -472,5 +459,6 @@ export function GridView({
         </table>
       </div>
     </section>
+    </>
   );
 }

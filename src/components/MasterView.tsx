@@ -1,31 +1,25 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { MasterChangeCandidate, MasterProjectValidation, ParsedMasterWorkbook } from '../types/master';
+import type { FilterOption } from '../types/comparison';
+import type { MasterChangeCandidate, ParsedMasterWorkbook } from '../types/master';
 import { assigneeTextMatches, splitAssignees } from '../utils/assignees';
 import { formatDateForSpain } from '../utils/dateUtils';
 import { normalizeText } from '../utils/normalizeText';
+import type { PlanningChangeFilter } from '../utils/planningFilters';
+import { initialPlanningFilters } from '../utils/planningFilters';
 import { getInitials, inferRowHierarchy } from '../utils/plannerData';
 import { MasterWorksheetEditor } from './MasterWorksheetEditor';
+import { PlanningFiltersBar } from './PlanningFiltersBar';
 
 interface MasterViewProps {
   candidates: MasterChangeCandidate[];
   masterWorkbook: ParsedMasterWorkbook | null;
-  validation: MasterProjectValidation;
-  plannerFileName: string | null;
-  masterFileName: string | null;
-  onCreateMaster: () => void;
-  canCreateMaster: boolean;
 }
-
-type ChangeReviewFilter = 'all' | 'start' | 'end' | 'both' | 'ambiguous' | 'unmatched';
 
 interface ReviewItem {
   candidate: MasterChangeCandidate;
   project: string;
   taskName: string;
-  taskNumber: string;
-  outlineNumber: string;
   assignee: string;
-  duration: string;
   previousStart: string | null;
   currentStart: string | null;
   previousEnd: string | null;
@@ -35,27 +29,8 @@ interface ReviewItem {
   searchText: string;
 }
 
-const changeFilterOptions: Array<{ value: ChangeReviewFilter; label: string }> = [
-  { value: 'all', label: 'Todos' },
-  { value: 'start', label: 'Inicio modificado' },
-  { value: 'end', label: 'Fin modificado' },
-  { value: 'both', label: 'Inicio y fin' },
-  { value: 'ambiguous', label: 'Coincidencia ambigua' },
-  { value: 'unmatched', label: 'Sin coincidencia' },
-];
-
 function displayDate(value: string | null): string {
   return formatDateForSpain(value) || '-';
-}
-
-function cellByHeader(candidate: MasterChangeCandidate, patterns: string[]): string {
-  const normalizedPatterns = patterns.map(normalizeText);
-  const cell = candidate.comparedRow.currentRow.cells.find((currentCell) => {
-    const header = normalizeText(currentCell.header);
-    return normalizedPatterns.some((pattern) => header.includes(pattern));
-  });
-
-  return cell?.displayValue?.trim() ?? '';
 }
 
 function changeValue(candidate: MasterChangeCandidate, field: 'startDate' | 'endDate', side: 'previous' | 'current') {
@@ -71,7 +46,7 @@ function fallbackCurrentDate(candidate: MasterChangeCandidate, field: 'startDate
 function changedFieldsLabel(candidate: MasterChangeCandidate): string {
   const fields = new Set(candidate.changes.map((change) => change.field));
   if (fields.has('startDate') && fields.has('endDate')) {
-    return 'Inicio y Fin';
+    return 'Inicio y fin';
   }
 
   if (fields.has('startDate')) {
@@ -121,111 +96,118 @@ function buildReviewItems(candidates: MasterChangeCandidate[]): ReviewItem[] {
       : candidate.projectName || 'Sin proyecto';
     const taskName = row.taskName.trim() || 'Sin nombre';
     const assignee = row.assignee.trim() || candidate.masterRow?.assignee || 'Sin asignar';
-    const duration = cellByHeader(candidate, ['duracion', 'duration']);
-    const taskNumber = cellByHeader(candidate, ['numero de tarea', 'n tarea', 'task number', 'id']);
-    const outlineNumber = cellByHeader(candidate, ['numero de esquema', 'esquema', 'outline']);
     const previousStart = changeValue(candidate, 'startDate', 'previous');
     const currentStart = changeValue(candidate, 'startDate', 'current') ?? fallbackCurrentDate(candidate, 'startDate');
     const previousEnd = changeValue(candidate, 'endDate', 'previous');
     const currentEnd = changeValue(candidate, 'endDate', 'current') ?? fallbackCurrentDate(candidate, 'endDate');
     const fieldsLabel = changedFieldsLabel(candidate);
     const candidateStatusLabel = statusLabel(candidate);
-    const searchText = normalizeText(
-      [
-        taskName,
-        taskNumber,
-        outlineNumber,
-        project,
-        assignee,
-        duration,
-        fieldsLabel,
-        candidateStatusLabel,
-        candidate.observation,
-        ...candidate.changes.flatMap((change) => [change.previous, change.current, change.label]),
-      ].join(' '),
-    );
 
     return {
       candidate,
       project,
       taskName,
-      taskNumber,
-      outlineNumber,
       assignee,
-      duration,
       previousStart,
       currentStart,
       previousEnd,
       currentEnd,
       changedFieldsLabel: fieldsLabel,
       statusLabel: candidateStatusLabel,
-      searchText,
+      searchText: normalizeText(
+        [
+          taskName,
+          project,
+          assignee,
+          fieldsLabel,
+          candidateStatusLabel,
+          candidate.observation,
+          ...candidate.changes.flatMap((change) => [change.previous, change.current, change.label]),
+        ].join(' '),
+      ),
     };
   });
 }
 
-function matchesChangeFilter(item: ReviewItem, filter: ChangeReviewFilter): boolean {
-  const fields = new Set(item.candidate.changes.map((change) => change.field));
-
+function matchesChangeFilter(item: ReviewItem, filter: PlanningChangeFilter): boolean {
   if (filter === 'all') {
     return true;
   }
 
-  if (filter === 'start') {
-    return fields.has('startDate') && !fields.has('endDate');
+  if (filter === 'changed') {
+    return item.candidate.changes.length > 0;
   }
 
-  if (filter === 'end') {
-    return fields.has('endDate') && !fields.has('startDate');
+  if (filter === 'unchanged') {
+    return item.candidate.status === 'no_change';
   }
 
-  if (filter === 'both') {
-    return fields.has('startDate') && fields.has('endDate');
+  if (filter === 'unmatched') {
+    return item.candidate.status === 'not_found';
   }
 
-  if (filter === 'ambiguous') {
-    return item.candidate.status === 'ambiguous';
+  if (filter === 'blocked') {
+    return item.candidate.status === 'blocked' || item.candidate.status === 'project_blocked';
   }
 
-  return item.candidate.status === 'not_found';
+  return item.candidate.status === 'ambiguous';
 }
 
-function uniqueOptions(values: string[]): string[] {
+function uniqueSorted(values: string[]): string[] {
   return Array.from(new Set(values.filter(Boolean))).sort((left, right) => left.localeCompare(right, 'es'));
 }
 
-export function MasterView({
-  candidates,
-  masterWorkbook,
-  validation,
-  plannerFileName,
-  masterFileName,
-  onCreateMaster,
-  canCreateMaster,
-}: MasterViewProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [projectFilter, setProjectFilter] = useState('all');
-  const [assigneeFilter, setAssigneeFilter] = useState('all');
-  const [changeFilter, setChangeFilter] = useState<ChangeReviewFilter>('all');
+function optionsFromLabels(labels: string[]): FilterOption[] {
+  return labels.map((label) => ({
+    value: label,
+    label,
+    normalized: normalizeText(label),
+  }));
+}
+
+function buildSelectedSummary(item: ReviewItem | null): string {
+  if (!item) {
+    return 'Selecciona una fila modificada para buscar coincidencias en el maestro.';
+  }
+
+  const parts = [`Cambio seleccionado: ${item.taskName}`];
+
+  if (item.previousStart || item.currentStart) {
+    parts.push(`Inicio: ${displayDate(item.previousStart)} -> ${displayDate(item.currentStart)}`);
+  }
+
+  if (item.previousEnd || item.currentEnd) {
+    parts.push(`Fin: ${displayDate(item.previousEnd)} -> ${displayDate(item.currentEnd)}`);
+  }
+
+  parts.push(`Campos: ${item.changedFieldsLabel}`);
+  return parts.join(' · ');
+}
+
+export function MasterView({ candidates, masterWorkbook }: MasterViewProps) {
+  const [filters, setFilters] = useState(initialPlanningFilters);
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
   const [autoDateFilterRequest, setAutoDateFilterRequest] = useState(0);
 
   const reviewItems = useMemo(() => buildReviewItems(candidates), [candidates]);
-  const projectOptions = useMemo(() => uniqueOptions(reviewItems.map((item) => item.project)), [reviewItems]);
+  const projectOptions = useMemo(
+    () => optionsFromLabels(uniqueSorted(reviewItems.map((item) => item.project))),
+    [reviewItems],
+  );
   const assigneeOptions = useMemo(
     () =>
-      uniqueOptions(
-        reviewItems.flatMap((item) => splitAssignees(item.assignee).map((person) => person.label)),
+      optionsFromLabels(
+        uniqueSorted(reviewItems.flatMap((item) => splitAssignees(item.assignee).map((person) => person.label))),
       ),
     [reviewItems],
   );
-  const normalizedSearch = normalizeText(searchTerm);
+  const normalizedSearch = normalizeText(filters.searchTerm);
   const filteredItems = reviewItems.filter((item) => {
     const matchesSearch = !normalizedSearch || item.searchText.includes(normalizedSearch);
-    const matchesProject = projectFilter === 'all' || item.project === projectFilter;
+    const matchesProject = filters.project === 'all' || item.project === filters.project;
     const matchesAssignee =
-      assigneeFilter === 'all' || assigneeTextMatches(item.assignee, new Set([normalizeText(assigneeFilter)]));
-    const matchesChange = matchesChangeFilter(item, changeFilter);
+      filters.assignee === 'all' || assigneeTextMatches(item.assignee, new Set([normalizeText(filters.assignee)]));
+    const matchesChange = matchesChangeFilter(item, filters.change);
 
     return matchesSearch && matchesProject && matchesAssignee && matchesChange;
   });
@@ -250,90 +232,24 @@ export function MasterView({
     .map((change) => change.previous)
     .filter((date): date is string => Boolean(date)) ?? [];
 
-  const clearChangeFilters = (): void => {
-    setSearchTerm('');
-    setProjectFilter('all');
-    setAssigneeFilter('all');
-    setChangeFilter('all');
-  };
-
   return (
-    <section className="master-view" aria-label="Excel maestro">
-      <div className={`master-validation ${validation.status === 'valid' ? 'is-valid' : 'is-blocked'}`}>
-        <div>
-          <p className="planner-kicker">Validación del maestro</p>
-          <h2>{validation.status === 'valid' ? 'Proyecto validado' : 'Proyecto pendiente de validar'}</h2>
-          <span>{validation.message}</span>
-          <span>
-            Planner: {plannerFileName ?? 'No cargado'} · Maestro: {masterFileName ?? 'No cargado'}
-          </span>
-        </div>
-        <button className="primary-button" type="button" disabled={!canCreateMaster} onClick={onCreateMaster}>
-          Crea Excel Maestro Actualizado
-        </button>
-      </div>
+    <>
+      <PlanningFiltersBar
+        filters={filters}
+        projectOptions={projectOptions}
+        assigneeOptions={assigneeOptions}
+        onFiltersChange={setFilters}
+        onClearFilters={() => setFilters(initialPlanningFilters)}
+      />
 
+      <section className="master-view" aria-label="Excel maestro">
       <div className="master-workspace">
         <section className="master-changes-panel" aria-label="Cambios detectados en Planner">
           <div className="master-section-heading">
-            <div>
-              <p className="planner-kicker">Revisión manual</p>
-              <h2>Cambios detectados en Planner</h2>
-            </div>
-            <div className="master-sheet-meta">
-              <span>{filteredItems.length} visibles</span>
-              <span>{reviewItems.length} para revisar</span>
-            </div>
-          </div>
-
-          <div className="master-change-toolbar">
-            <label className="grid-search">
-              <span>Buscar</span>
-              <input
-                type="search"
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.currentTarget.value)}
-                placeholder="Buscar por nombre, proyecto, responsable o fecha"
-              />
-            </label>
-            <label>
-              <span>Proyecto</span>
-              <select value={projectFilter} onChange={(event) => setProjectFilter(event.currentTarget.value)}>
-                <option value="all">Todos</option>
-                {projectOptions.map((project) => (
-                  <option key={project} value={project}>
-                    {project}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>Asignado a</span>
-              <select value={assigneeFilter} onChange={(event) => setAssigneeFilter(event.currentTarget.value)}>
-                <option value="all">Todos</option>
-                {assigneeOptions.map((assignee) => (
-                  <option key={assignee} value={assignee}>
-                    {assignee}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>Tipo de cambio</span>
-              <select
-                value={changeFilter}
-                onChange={(event) => setChangeFilter(event.currentTarget.value as ChangeReviewFilter)}
-              >
-                {changeFilterOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <button className="secondary-button grid-clear-button" type="button" onClick={clearChangeFilters}>
-              Limpiar filtros
-            </button>
+            <h2>Cambios detectados en Planner</h2>
+            <span className="master-inline-count">
+              {filteredItems.length} visibles · {reviewItems.length} para revisar
+            </span>
           </div>
 
           <div className="master-change-table-shell">
@@ -341,11 +257,8 @@ export function MasterView({
               <thead>
                 <tr>
                   <th>Tarea</th>
-                  <th>Nº tarea</th>
-                  <th>Nº esquema</th>
-                  <th>Proyecto</th>
+                  <th>Proyecto / plan</th>
                   <th>Asignado a</th>
-                  <th>Duración</th>
                   <th>Inicio anterior</th>
                   <th>Inicio actual</th>
                   <th>Fin anterior</th>
@@ -357,8 +270,8 @@ export function MasterView({
               <tbody>
                 {filteredItems.length === 0 ? (
                   <tr>
-                    <td colSpan={12} className="grid-empty-row">
-                      No hay cambios para los filtros seleccionados.
+                    <td colSpan={9} className="grid-empty-row">
+                      No hay cambios detectados para los filtros actuales.
                     </td>
                   </tr>
                 ) : (
@@ -369,8 +282,6 @@ export function MasterView({
                       onClick={() => setSelectedCandidateId(item.candidate.id)}
                     >
                       <td className="master-task-cell">{item.taskName}</td>
-                      <td>{item.taskNumber || '-'}</td>
-                      <td>{item.outlineNumber || '-'}</td>
                       <td>{item.project}</td>
                       <td>
                         <span className="grid-assignee">
@@ -380,7 +291,6 @@ export function MasterView({
                           {item.assignee}
                         </span>
                       </td>
-                      <td>{item.duration || '-'}</td>
                       <td>{displayDate(item.previousStart)}</td>
                       <td>{displayDate(item.currentStart)}</td>
                       <td>{displayDate(item.previousEnd)}</td>
@@ -394,47 +304,16 @@ export function MasterView({
             </table>
           </div>
 
-          <div className="master-selected-change">
-            {selectedItem ? (
-              <>
-                <div>
-                  <p className="planner-kicker">Cambio seleccionado</p>
-                  <h3>{selectedItem.taskName}</h3>
-                  <dl>
-                    <div>
-                      <dt>Inicio anterior</dt>
-                      <dd>{displayDate(selectedItem.previousStart)}</dd>
-                    </div>
-                    <div>
-                      <dt>Inicio nuevo</dt>
-                      <dd>{displayDate(selectedItem.currentStart)}</dd>
-                    </div>
-                    <div>
-                      <dt>Fin anterior</dt>
-                      <dd>{displayDate(selectedItem.previousEnd)}</dd>
-                    </div>
-                    <div>
-                      <dt>Fin nuevo</dt>
-                      <dd>{displayDate(selectedItem.currentEnd)}</dd>
-                    </div>
-                    <div>
-                      <dt>Campos modificados</dt>
-                      <dd>{selectedItem.changedFieldsLabel}</dd>
-                    </div>
-                  </dl>
-                </div>
-                <button
-                  className="primary-button"
-                  type="button"
-                  disabled={previousDates.length === 0}
-                  onClick={() => setAutoDateFilterRequest((request) => request + 1)}
-                >
-                  Buscar coincidencias en Seguimiento Proyectos
-                </button>
-              </>
-            ) : (
-              <p>Selecciona una fila modificada para ver el resumen del cambio.</p>
-            )}
+          <div className="master-selected-compact">
+            <p>{buildSelectedSummary(selectedItem)}</p>
+            <button
+              className="primary-button"
+              type="button"
+              disabled={!selectedItem || previousDates.length === 0}
+              onClick={() => setAutoDateFilterRequest((request) => request + 1)}
+            >
+              Buscar coincidencias en Seguimiento Proyectos
+            </button>
           </div>
         </section>
 
@@ -445,5 +324,6 @@ export function MasterView({
         />
       </div>
     </section>
+    </>
   );
 }

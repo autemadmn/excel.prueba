@@ -347,7 +347,6 @@ export function MasterWorksheetEditor({
     <section className="master-workbook-panel" aria-label="Excel maestro interno editable">
       <div className="master-section-heading">
         <div>
-          <p className="planner-kicker">Edición manual</p>
           <h2>Excel maestro interno editable</h2>
         </div>
         <div className="master-sheet-meta">
