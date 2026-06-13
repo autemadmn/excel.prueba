@@ -25,6 +25,7 @@ export function FileUploadCard({
 }: FileUploadCardProps) {
   const inputId = useId();
   const [isDragging, setIsDragging] = useState(false);
+  const excelLogoUrl = `${import.meta.env.BASE_URL}excellogo.png`;
 
   const handleFile = (file: File | null): void => {
     if (file) {
@@ -47,9 +48,7 @@ export function FileUploadCard({
       }}
     >
       <div className="upload-card-header">
-        <span className="upload-file-icon" aria-hidden="true">
-          XLSX
-        </span>
+        <img className="upload-file-icon" src={excelLogoUrl} alt="" aria-hidden="true" />
         <div>
           <h2>{label}</h2>
           <p>{helperText}</p>
@@ -71,9 +70,7 @@ export function FileUploadCard({
 
       {fileName && (
         <div className="selected-file-row">
-          <span className="selected-file-icon" aria-hidden="true">
-            XL
-          </span>
+          <img className="selected-file-icon" src={excelLogoUrl} alt="" aria-hidden="true" />
           <span className="selected-file-info">
             <strong>{fileName}</strong>
             <span>{isReady ? 'Excel validado' : 'Excel seleccionado'}</span>

@@ -37,12 +37,12 @@ export function FileStatusBar({
   lastLoadAt,
   onChangeFiles,
 }: FileStatusBarProps) {
+  const excelLogoUrl = `${import.meta.env.BASE_URL}excellogo.png`;
+
   return (
     <section className="file-status-card" aria-label="Archivos cargados">
       <div className="file-status-item">
-        <span className="file-status-icon" aria-hidden="true">
-          XLSX
-        </span>
+        <img className="file-status-icon" src={excelLogoUrl} alt="" aria-hidden="true" />
         <div>
           <strong>Excel de Planner (actual)</strong>
           <span>{fileNameLabel(plannerFileName)}</span>
@@ -51,9 +51,7 @@ export function FileStatusBar({
       </div>
 
       <div className="file-status-item">
-        <span className="file-status-icon" aria-hidden="true">
-          XLSX
-        </span>
+        <img className="file-status-icon" src={excelLogoUrl} alt="" aria-hidden="true" />
         <div>
           <strong>Excel maestro</strong>
           <span>{fileNameLabel(masterFileName)}</span>

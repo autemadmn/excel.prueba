@@ -136,15 +136,9 @@ main .secondary-button:hover:not(:disabled) {
 
 .upload-file-icon,
 .selected-file-icon {
-  display: inline-grid;
-  place-items: center;
+  display: block;
   flex: 0 0 auto;
-  border: 1px solid rgba(46, 155, 95, 0.2);
-  border-radius: 6px;
-  color: #17663b;
-  background: #edf8f1;
-  font-size: 0.68rem;
-  font-weight: 800;
+  object-fit: contain;
 }
 
 .upload-file-icon {
@@ -1626,7 +1620,6 @@ main {
   white-space: nowrap;
 }
 
-.file-status-icon,
 .file-status-time-icon {
   display: inline-grid;
   place-items: center;
@@ -1639,8 +1632,11 @@ main {
 }
 
 .file-status-icon {
-  color: #15803d;
-  background: #dcfce7;
+  display: block;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  object-fit: contain;
 }
 
 .file-status-time-icon {
