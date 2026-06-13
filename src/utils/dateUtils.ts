@@ -141,6 +141,26 @@ export function normalizeExcelDateValue(value: unknown, displayText?: string): s
   return toCanonicalDateOnly(value) ?? toCanonicalDateOnly(displayText ?? '');
 }
 
+export function extractCanonicalDatesFromText(value: string): string[] {
+  const dates = new Set<string>();
+  const patterns = [
+    /\b\d{4}[-/]\d{1,2}[-/]\d{1,2}\b/g,
+    /\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b/g,
+    /\b\d{1,2}[.]\d{1,2}[.]\d{2,4}\b/g,
+  ];
+
+  for (const pattern of patterns) {
+    for (const match of value.matchAll(pattern)) {
+      const canonical = toCanonicalDateOnly(match[0]);
+      if (canonical) {
+        dates.add(canonical);
+      }
+    }
+  }
+
+  return Array.from(dates);
+}
+
 export function formatDateForSpain(value: string | null): string {
   if (!value) {
     return '';

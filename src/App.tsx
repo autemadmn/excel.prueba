@@ -188,6 +188,7 @@ function App() {
       return (
         <MasterView
           candidates={masterCandidates}
+          masterWorkbook={master.workbook}
           validation={validation}
           plannerFileName={planner.fileName}
           masterFileName={master.fileName}

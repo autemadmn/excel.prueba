@@ -1,4 +1,4 @@
-# Gestor de planificación Planner
+# Actualizador Planner
 
 Aplicación web local para trabajar con un Excel exportado de Planner y un Excel maestro. Permite revisar datos, filtrar tareas, validar el proyecto y crear una copia actualizada del Excel maestro sin backend ni subida de archivos.
 

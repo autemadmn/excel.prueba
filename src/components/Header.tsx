@@ -5,16 +5,14 @@ interface HeaderProps {
 }
 
 export function Header({ canCreateMaster, onCreateMaster, onLoadDemoData }: HeaderProps) {
+  const peLogoUrl = `${import.meta.env.BASE_URL}pe-logo.webp`;
+
   return (
     <header className="app-header">
       <div className="header-title-group">
-        <span className="header-product-icon" aria-hidden="true">
-          XL
-        </span>
+        <img className="header-company-logo" src={peLogoUrl} alt="Power Electronics" />
         <div>
-          <p className="eyebrow">Herramienta local</p>
-          <h1>Gestor de planificación Planner</h1>
-          <p>Revisa, filtra y actualiza datos de planificación desde Excel</p>
+          <h1>Actualizador Planner</h1>
         </div>
       </div>
       <div className="header-actions">

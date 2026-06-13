@@ -1499,18 +1499,13 @@ body {
   min-width: 0;
 }
 
-.header-product-icon {
-  display: inline-grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
+.header-company-logo {
+  display: block;
+  width: auto;
+  height: clamp(28px, 3vw, 40px);
+  max-width: 170px;
   flex: 0 0 auto;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 10px;
-  color: #dcfce7;
-  background: rgba(22, 163, 74, 0.18);
-  font-size: 0.72rem;
-  font-weight: 900;
+  object-fit: contain;
 }
 
 .app-header .eyebrow {
@@ -1521,7 +1516,8 @@ body {
 }
 
 .app-header h1 {
-  font-size: 1.12rem;
+  font-size: 1.18rem;
+  font-weight: 800;
 }
 
 .app-header p {
@@ -2051,6 +2047,306 @@ main {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
+}
+
+.master-workspace {
+  display: grid;
+  gap: 14px;
+}
+
+.master-changes-panel,
+.master-workbook-panel {
+  display: grid;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  background: #ffffff;
+}
+
+.master-changes-panel {
+  gap: 12px;
+  max-height: 42vh;
+}
+
+.master-workbook-panel {
+  gap: 12px;
+  min-height: 58vh;
+}
+
+.master-section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.master-section-heading h2,
+.master-selected-change h3 {
+  margin: 0;
+  color: var(--navy-900);
+}
+
+.master-section-heading h2 {
+  font-size: 1rem;
+}
+
+.master-selected-change h3 {
+  font-size: 0.98rem;
+}
+
+.master-sheet-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.master-sheet-meta span {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: var(--text-secondary);
+  background: #f8fafc;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.master-change-toolbar,
+.master-sheet-toolbar {
+  display: grid;
+  gap: 10px;
+  align-items: end;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--surface);
+}
+
+.master-change-toolbar {
+  grid-template-columns: minmax(260px, 1.2fr) repeat(3, minmax(150px, 0.55fr)) auto;
+}
+
+.master-sheet-toolbar {
+  grid-template-columns: minmax(180px, 0.6fr) minmax(260px, 1.1fr) minmax(190px, 0.65fr) minmax(180px, 0.65fr) auto;
+}
+
+.master-change-toolbar label,
+.master-sheet-toolbar label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.master-change-toolbar label > span,
+.master-sheet-toolbar label > span {
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.master-change-toolbar input,
+.master-change-toolbar select,
+.master-sheet-toolbar input,
+.master-sheet-toolbar select {
+  min-height: 38px;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0 10px;
+  color: var(--text-primary);
+  background: #ffffff;
+  font-size: 0.84rem;
+}
+
+.master-change-table-shell,
+.master-edit-table-shell {
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.master-change-table-shell {
+  max-height: 24vh;
+}
+
+.master-edit-table-shell {
+  min-height: 420px;
+  max-height: 64vh;
+}
+
+.master-change-table,
+.master-edit-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.82rem;
+}
+
+.master-change-table th,
+.master-change-table td,
+.master-edit-table th,
+.master-edit-table td {
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.master-change-table th,
+.master-edit-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  color: var(--navy-900);
+  background: #eef3f8;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.master-change-table tbody tr {
+  cursor: pointer;
+}
+
+.master-change-table tbody tr:nth-child(even) td,
+.master-edit-table tbody tr:nth-child(even) td {
+  background: #fbfcfe;
+}
+
+.master-change-table tbody tr:hover td,
+.master-change-table tbody tr.is-selected td {
+  background: #edf6ff;
+}
+
+.master-change-table tbody tr.is-selected td {
+  box-shadow: inset 0 -2px 0 var(--m365-accent);
+}
+
+.master-task-cell {
+  min-width: 280px;
+  max-width: 420px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.master-selected-change {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1px solid rgba(36, 74, 112, 0.16);
+  border-radius: 8px;
+  padding: 12px;
+  background: #f8fbff;
+}
+
+.master-selected-change p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-weight: 700;
+}
+
+.master-selected-change dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 0;
+}
+
+.master-selected-change div div {
+  display: grid;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  background: #ffffff;
+}
+
+.master-selected-change dt {
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.master-selected-change dd {
+  margin: 0;
+  color: var(--navy-900);
+  font-weight: 900;
+}
+
+.master-auto-filter-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid rgba(217, 119, 6, 0.24);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #7a5200;
+  background: #fff7dd;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.master-row-number {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 64px;
+  color: var(--text-secondary);
+  background: #f8fafc !important;
+  text-align: right !important;
+  font-weight: 800;
+}
+
+.master-edit-table th.master-row-number {
+  z-index: 3;
+}
+
+.master-edit-table th span,
+.master-edit-table th small {
+  display: block;
+}
+
+.master-edit-table th small {
+  margin-top: 2px;
+  color: var(--text-secondary);
+  font-size: 0.66rem;
+}
+
+.master-edit-table td {
+  padding: 0;
+}
+
+.master-edit-table input {
+  width: 100%;
+  min-height: 34px;
+  border: 0;
+  padding: 7px 9px;
+  color: var(--text-primary);
+  background: transparent;
+  font: inherit;
+}
+
+.master-edit-table input:focus {
+  outline: 2px solid var(--m365-accent);
+  outline-offset: -2px;
+  background: #ffffff;
+}
+
+.master-date-match-cell {
+  background: #fff3c4 !important;
+  box-shadow: inset 0 0 0 2px #d97706;
+}
+
+.master-date-match-cell input {
+  color: #7a5200;
+  font-weight: 900;
 }
 
 @media (max-width: 1100px) {
